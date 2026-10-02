@@ -1,0 +1,54 @@
+import socket
+import json
+from datetime import datetime
+
+# Controlled Reconnaissance Lab
+# Use ONLY on localhost or systems you are authorized to test.
+
+TARGET = "127.0.0.1"
+
+# Keep the port list limited to your controlled lab
+PORTS = [22, 80, 443, 8080]
+
+results = []
+
+print("=" * 50)
+print(" CONTROLLED RECONNAISSANCE LAB")
+print("=" * 50)
+print(f"Target: {TARGET}")
+print()
+
+for port in PORTS:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+
+    try:
+        status = sock.connect_ex((TARGET, port))
+
+        if status == 0:
+            result = "OPEN"
+        else:
+            result = "CLOSED"
+
+        print(f"Port {port}: {result}")
+
+        results.append({
+            "target": TARGET,
+            "port": port,
+            "status": result,
+            "timestamp": datetime.now().isoformat()
+        })
+
+    except Exception as error:
+        print(f"Port {port}: ERROR - {error}")
+
+    finally:
+        sock.close()
+
+# Save findings
+with open("findings.json", "w") as file:
+    json.dump(results, file, indent=4)
+
+print()
+print("Reconnaissance completed.")
+print("Findings saved to: findings.json")
